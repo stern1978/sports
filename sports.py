@@ -15,9 +15,10 @@ uefa_champions = 'https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.cham
 uefa_europa = 'https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.europa/scoreboard'
 club_friendly = 'https://site.api.espn.com/apis/site/v2/sports/soccer/CLUB.FRIENDLY/scoreboard'
 nfl_url = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard'
+world_cup = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard'
 
-url_list = [nhl_url, nfl_url, mlb_url, uefa_champions, uefa_europa, club_friendly, epl_url]
-team_list = ['NYR', 'ARS', 'MIL', 'NYY', 'GB']
+url_list = [nhl_url, nfl_url, mlb_url, uefa_champions, uefa_europa, club_friendly, epl_url, world_cup]
+team_list = ['New York Rangers', 'Arsenal', 'Milwaukee Brewers', 'New York Yankees', 'Green Bay Packers', 'United States']
 
 @app.route('/')
 def index():
@@ -38,7 +39,7 @@ def index():
                try:
                   for _ in events:
                      try:               
-                        teams_playing = url_data['events'][counter]['shortName']
+                        teams_playing = url_data['events'][counter]['name']
                         for team in team_list:
                            if team in teams_playing:
                                  home_team =  url_data['events'][counter]['competitions'][0]['competitors'][0]['team']['name']
