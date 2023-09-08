@@ -13,8 +13,10 @@ uefa_europa = 'https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.europa/
 club_friendly = 'https://site.api.espn.com/apis/site/v2/sports/soccer/CLUB.FRIENDLY/scoreboard'
 nfl_url = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard'
 world_cup = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard'
+mls = 'https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/scoreboard'
+community_shield = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.charity/scoreboard'
 
-url_list = [nhl_url, nfl_url, mlb_url, uefa_champions, uefa_europa, club_friendly, epl_url, world_cup]
+url_list = [nhl_url, nfl_url, mlb_url, uefa_champions, uefa_europa, club_friendly, epl_url, world_cup, mls, community_shield]
 team_list = ['New York Rangers', 'Arsenal', 'Milwaukee Brewers', 'New York Yankees', 'Green Bay Packers', 'United States']
 
 def index():
@@ -26,15 +28,11 @@ def index():
          url_get = requests.get(url)
          url_data = url_get.json()
          now_espn = datetime.datetime.now().strftime('%Y-%m-%dT%H:%MZ')
-         #print(now_espn)
          tomorrow = datetime.datetime.now() + datetime.timedelta(hours= -48)
          tomorrow_espn = tomorrow.strftime('%Y-%m-%dT%H:%MZ')
-         #print(tomorrow_espn)
-         if url_data['leagues'][0]['calendarEndDate'] > now_espn:
-            #if url_data['leagues'][0]['season']['type']['id'] != '4':
+         if url_data['leagues'][0]['season']['type']['id'] != '4': #removes offseason games
             if url_data['events'][counter]['competitions'][0]['startDate'] > tomorrow_espn:
                sport_name = url_data['leagues'][0]['name']
-               #print(sport_name, url_data['events'][counter]['competitions'][0]['recent'])
                sport_dict[sport_name] = []
                for events in url_data:
                   try:
@@ -46,7 +44,7 @@ def index():
                                  recent = url_data['events'][counter]['competitions'][0]['recent']
                                  home_team =  url_data['events'][counter]['competitions'][0]['competitors'][0]['team']['name']
                                  away_team =  url_data['events'][counter]['competitions'][0]['competitors'][1]['team']['name']
-                                 match_status = url_data['events'][counter]['competitions'][0]['status']['type']['detail']
+                                 match_status = url_data['events'][counter]['competitions'][0]['status']['type']['shortDetail']
                                  home_score = url_data['events'][counter]['competitions'][0]['competitors'][0]['score']
                                  away_score = url_data['events'][counter]['competitions'][0]['competitors'][1]['score']
                                  home_logo = url_data['events'][counter]['competitions'][0]['competitors'][0]['team']['logo']
