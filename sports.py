@@ -1,81 +1,79 @@
 #!/usr/bin/python3
 
-import datetime
 import requests
 import pickle
 
 
-mlb_url = 'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard'
-nhl_url = 'http://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard'
-epl_url = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard'
-uefa_champions = 'https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.champions/scoreboard'
-uefa_europa = 'https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.europa/scoreboard'
-club_friendly = 'https://site.api.espn.com/apis/site/v2/sports/soccer/CLUB.FRIENDLY/scoreboard'
-nfl_url = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard'
-world_cup = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard'
-mls = 'https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/scoreboard'
-community_shield = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.charity/scoreboard'
-carabao_cup = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.league_cup/scoreboard'
+today_games = 'https://site.api.espn.com/apis/v2/scoreboard/header'
 
-url_list = [nhl_url, nfl_url, mlb_url, uefa_champions, uefa_europa, club_friendly, epl_url, world_cup, mls, carabao_cup, community_shield]
-team_list = ['New York Rangers', 'Arsenal', 'Milwaukee Brewers', 'New York Yankees', 'Green Bay Packers', 'United States']
+team_list = ['New York Rangers', 'Arsenal', 'Green Bay Packers', 'United States', 'Milwaukee Brewers', 'New York Yankees']
 
 def index():
-    sport_dict = {}
     team_dict = {}
     try:
-        for url in url_list:
-            counter = 0
-            url_get = requests.get(url)
-            url_data = url_get.json()
-            now_espn = datetime.datetime.now().strftime('%Y-%m-%dT%H:%MZ')
-            tomorrow = datetime.datetime.now() + datetime.timedelta(hours= -48)
-            tomorrow_espn = tomorrow.strftime('%Y-%m-%dT%H:%MZ')
-            if url_data['leagues'][0]['season']['type']['id'] != '4': #removes offseason games
-                if url_data['events'][counter]['competitions'][0]['startDate'] > tomorrow_espn:
-                    sport_name = url_data['leagues'][0]['name']
-                    sport_dict[sport_name] = []
-                    for events in url_data:
+        sports_couner = 0
+        url_get = requests.get(today_games)
+        url_data = url_get.json()
+
+        for _ in url_data['sports']:
+            sport = url_data['sports'][sports_couner]['slug']
+            print(sport, sports_couner)
+            
+            events_counter = 0
+            leagues_counter = 0
+            for _ in url_data['sports'][sports_couner]['leagues']:
+                try:
+                    for x in url_data['sports'][sports_couner]['leagues'][leagues_counter]['events']:
                         try:
-                            for _ in events:
-                                try:
-                                    teams_playing = url_data['events'][counter]['name']
-                                    for team in team_list:
-                                        if team in teams_playing:
-                                            recent = url_data['events'][counter]['competitions'][0]['recent']
-                                            home_team =  url_data['events'][counter]['competitions'][0]['competitors'][0]['team']['name']
-                                            away_team =  url_data['events'][counter]['competitions'][0]['competitors'][1]['team']['name']
-                                            match_status = url_data['events'][counter]['competitions'][0]['status']['type']['detail']
-                                            home_score = url_data['events'][counter]['competitions'][0]['competitors'][0]['score']
-                                            away_score = url_data['events'][counter]['competitions'][0]['competitors'][1]['score']
-                                            home_logo = url_data['events'][counter]['competitions'][0]['competitors'][0]['team']['logo']
-                                            away_logo = url_data['events'][counter]['competitions'][0]['competitors'][1]['team']['logo']
-                                            game_status = url_data['events'][counter]['competitions'][0]['status']['type']['name']
-                                            time = url_data['events'][counter]['date'] + url_data['events'][counter]['id']
-                                            try:
-                                                channel = '- On ' + url_data['events'][counter]['competitions'][0]['broadcasts'][0]['names'][0]
-                                            except:
-                                                channel = ''
-                                            slug = url_data['events'][counter]['season']['slug'].replace('-', ' ')
-                                            team_dict[time] =[]
-                                            team_dict[time].append([away_team, away_score, away_logo, home_team, home_score, home_logo, match_status, game_status, sport_name, channel, recent, slug.title()])
-                                                
-                                            sport_dict[sport_name].append([away_team, away_score, away_logo, home_team, home_score, home_logo, match_status, game_status, time, channel, recent, slug])
-                                    counter+=1
-                                except KeyError as e:
-                                    print(e)
-                        except IndexError:
-                            pass    
-                    if not sport_dict[sport_name]:
-                        del sport_dict[sport_name]
+                            sub_sport = url_data['sports'][sports_couner]['leagues'][leagues_counter]['name']
+                            time = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['date'] + url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['id']
+                            match_status = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['fullStatus']['type']['detail']
+                            try:
+                                game_status = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['fullStatus']['type']['name']
+                            except:
+                                game_status = 'games_status'
+                            try:
+                                channel = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['broadcast']
+                            except KeyError:
+                                channel = ''
+                            away_team = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['competitors'][0]['displayName']
+                            away_team_logo = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['competitors'][0]['logo']
+                            try:
+                                away_score = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['competitors'][0]['score']
+                                home_score = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['competitors'][1]['score']
+                            except KeyError as e:
+                                home_score = 0
+                                away_score = 0
+                            home_team = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['competitors'][1]['displayName']
+                            home_team_logo = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['competitors'][1]['logo']
+                            recent = 0
+                            season = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['group']['name']
+                            print(away_team, home_team, leagues_counter, events_counter)
+                            events_counter += 1
+                            for x in url_data['sports'][sports_couner]['leagues'][leagues_counter]['events']:
+                                for team in team_list:
+                                    if team == home_team or team == away_team:
+                                        #print(home_team, home_score +' - '+ away_team, away_score, match_status, time, channel)
+                                        team_dict[time] =[]
+                                        team_dict[time].append([away_team, away_score, away_team_logo, home_team, home_score, home_team_logo, match_status, game_status, sub_sport, channel, recent, season.title(), sport])
+                        except:
+                            pass  
+                    leagues_counter += 1  
+                except:
+                    print('sub sport', sub_sport)
+
+            sports_couner += 1
         sort = dict(sorted(team_dict.items(), key=lambda item: item[0]))
         fname = 'pickled.pk'
+        print(sort)
 
         with open(fname, 'wb') as f:
             pickle.dump(sort, f)
-    
-    except KeyError as e:
-        print(e)
+
+    except IOError as e:
+        print(e, 'IndexError end')
+        pass
+
 
 if __name__ == '__main__':
     index()
