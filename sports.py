@@ -17,7 +17,6 @@ def index():
 
         for _ in url_data['sports']:
             sport = url_data['sports'][sports_couner]['slug']
-            #print(sport, sports_couner)
             
             events_counter = 0
             leagues_counter = 0
@@ -54,12 +53,10 @@ def index():
                             
                             recent = 0
                             season = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['group']['name']
-                            #print(away_team, home_team, leagues_counter, events_counter)
                             events_counter += 1
                             for x in url_data['sports'][sports_couner]['leagues'][leagues_counter]['events']:
                                 for team in team_list:
                                     if team == home_team or team == away_team:
-                                        #print(home_team, home_score +' - '+ away_team, away_score, match_status, time, channel)
                                         team_dict[time] =[]
                                         team_dict[time].append([away_team, away_score, away_team_logo, home_team, home_score, home_team_logo, match_status, game_status, sub_sport, channel, recent, season.title(), sport])
                         except:
