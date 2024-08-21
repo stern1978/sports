@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-#test
 
 import requests
 import pickle
