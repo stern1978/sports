@@ -6,7 +6,7 @@ import pickle
 
 today_games = 'https://site.api.espn.com/apis/v2/scoreboard/header'
 
-team_list = ['New York Rangers', 'Arsenal', 'Green Bay Packers', 'United States', 'Milwaukee Brewers', 'United States of America']
+team_list = ['New York Rangers', 'Arsenal', 'Green Bay Packers', 'United States', 'Milwaukee Brewers', 'United States of America', 'New York Yankees']
 
 def index():
     team_dict = {}
@@ -25,7 +25,7 @@ def index():
                     for x in url_data['sports'][sports_couner]['leagues'][leagues_counter]['events']:
                         try:
                             sub_sport = url_data['sports'][sports_couner]['leagues'][leagues_counter]['name']
-                            print(sub_sport)
+                            #print(sub_sport)
                             time = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['date'] + url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['id']
                             match_status = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['fullStatus']['type']['detail']
                             try:
@@ -35,7 +35,7 @@ def index():
                             try:
                                 channel = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['broadcast']
                             except KeyError:
-                                channel = ''
+                                channel = 'unknown'
                             away_team = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['competitors'][0]['displayName']
                             try:
                                 away_team_logo = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['competitors'][0]['logoDark']
@@ -53,12 +53,22 @@ def index():
                             
                             recent = 0
                             season = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['group']['name']
+                            try:
+                                note = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['note']
+                                #print(note)
+                            except KeyError:
+                                note = ''
+                            try:
+                                seriesSummary = url_data['sports'][sports_couner]['leagues'][leagues_counter]['events'][events_counter]['seriesSummary']
+                            except KeyError:
+                                seriesSummary = ''
+                            #print(seriesSummary)
                             events_counter += 1
                             for x in url_data['sports'][sports_couner]['leagues'][leagues_counter]['events']:
                                 for team in team_list:
                                     if team == home_team or team == away_team:
                                         team_dict[time] =[]
-                                        team_dict[time].append([away_team, away_score, away_team_logo, home_team, home_score, home_team_logo, match_status, game_status, sub_sport, channel, recent, season.title(), sport])
+                                        team_dict[time].append([away_team, away_score, away_team_logo, home_team, home_score, home_team_logo, match_status, game_status, sub_sport, channel, recent, season, sport, note, seriesSummary])
                         except:
                             events_counter = 0  
                     leagues_counter += 1  
@@ -68,7 +78,7 @@ def index():
             sports_couner += 1
         sort = dict(sorted(team_dict.items(), key=lambda item: item[0]))
         fname = 'pickled.pk'
-        print(sort)
+        #print(sort)
 
         with open(fname, 'wb') as f:
             pickle.dump(sort, f)

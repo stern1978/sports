@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="cache-control" content="no-cache" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="-1" />
+        <meta charset="utf-8">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta http-equiv='refresh' content="60">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel='stylesheet' href="/static/css/mystyle.css">
+        <title>Sports</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: black;
+                color: white;
+                margin: 20px;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 10px;
+            }
+            th {
+                text-align: center;
+                background-color: #333;
+                color: white;
+                padding: 10px;
+                font-size: 24px;
+            }
+            td {
+                padding: 5px;
+                text-align: center;
+                font-size: 16px;
+                color: white;
+            }
+            img {
+                width: 100px;
+                display: block;
+                margin: 0 auto;
+            }
+            p {
+                line-height: 1;
+                margin: 0;
+                color: white;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="column">
+            <table>
+                <th>Sports Scores</th>
+            </table>
+            <div id="scoreboard"></div>
+        </div>
+
+        <script>
+            const teamList = ['New York Rangers', 'Arsenal', 'Green Bay Packers', 'United States', 'Milwaukee Brewers', 'United States of America', 'Boston Red Sox'];
+            const todayGamesUrl = 'https://site.api.espn.com/apis/v2/scoreboard/header';
+
+            async function fetchSportsData() {
+                try {
+                    const response = await fetch(todayGamesUrl);
+                    const data = await response.json();
+                    const scoreboard = document.getElementById('scoreboard');
+
+                    data.sports.forEach(sport => {
+                        sport.leagues.forEach(league => {
+                            league.events.forEach(event => {
+                                const homeTeam = event.competitors[1];
+                                const awayTeam = event.competitors[0];
+                                const subSport = league.name;
+                                const status = event.fullStatus.type.detail || 'Scheduled';
+                                const gameStatus = event.fullStatus.type.name;
+                                const season = event.group.name || '';
+                                const channel = event.broadcast ? event.broadcast : 'N/A';
+
+                                if (teamList.includes(homeTeam.displayName) || teamList.includes(awayTeam.displayName)) {
+                                    const tableContainer = document.createElement('div');
+
+                                    // First Table
+                                    const subSportTable = document.createElement('table');
+                                    subSportTable.style.borderTop = '1px solid grey';
+                                    subSportTable.innerHTML = `
+                                        <p style="line-height: 1; margin: 0; text-align: left;">${subSport} ${channel} <span style="float:right">${season}</span></p>
+                                    `;
+                                    tableContainer.appendChild(subSportTable);
+
+                                    // Second Table
+                                    const gameTable = document.createElement('table');
+                                    gameTable.style.borderTop = '1px solid grey';
+                                    gameTable.style.borderBottom = '1px solid grey';
+                                    
+                                    if (sport.slug.includes("soccer")) {
+                                        gameTable.innerHTML = `
+                                            <tr>
+                                                <td><img src="${homeTeam.logo}" alt="home_logo"></td>
+                                                <td style="font-size: 50px; text-align: center; color: white;">${gameStatus === "STATUS_SCHEDULED" ? "VS" : `${homeTeam.score} - ${awayTeam.score}`}</td>
+                                                <td><img src="${awayTeam.logo}" alt="away_logo"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>${homeTeam.displayName}</td>
+                                                <td style="line-height: 1; margin: 0; font-size: 20px; text-align: center; color: white;">${status}</td>
+                                                <td>${awayTeam.displayName}</td>
+                                            </tr>
+                                        `;
+                                    } else {
+                                        gameTable.innerHTML = `
+                                            <tr>
+                                                <td><img src="${awayTeam.logo}" alt="away_logo"></td>
+                                                <td style="font-size: 50px; text-align: center; color: white;">${gameStatus === "STATUS_SCHEDULED" ? "@" : `${awayTeam.score} - ${homeTeam.score}`}</td>
+                                                <td><img src="${homeTeam.logo}" alt="home_logo"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>${awayTeam.displayName}</td>
+                                                <td style="line-height: 1; margin: 0; font-size: 20px; text-align: center; color: white;">${status}</td>
+                                                <td>${homeTeam.displayName}</td>
+                                            </tr>
+                                        `;
+                                    }
+
+                                    tableContainer.appendChild(gameTable);
+                                    scoreboard.appendChild(tableContainer);
+                                }
+                            });
+                        });
+                    });
+                } catch (error) {
+                    console.error('Error fetching sports data:', error);
+                }
+            }
+
+            // Fetch data when page loads
+            fetchSportsData();
+        </script>
+    </body>
+</html>

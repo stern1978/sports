@@ -9,6 +9,16 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel='stylesheet' href="/static/css/mystyle.css">
         <title>Sports</title>
+        <script type="text/javascript">
+            window.onload = function() {
+                // Checking if the data is empty
+                var sportData = ('{{ sport_dict|tojson }}');
+                if (Object.keys(sportData).length === 0) {
+                    // Redirect to a different URL if data is empty
+                    window.location.href = "http://192.168.1.200:8014";
+                }
+            };
+        </script>
     </head>
     <body>
         <div class="column">
@@ -18,7 +28,7 @@
             {%for x in sport_dict%}
             {%for i in sport_dict[x]%}
             <table style="width: 100%; border-top: 1px solid grey;">
-                <p style="line-height: 1; margin: 0; text-align: left;">{{i[8]}} {{i[9]}} <span style="float:right">{{i[11]}}</span> </p>
+                <p style="line-height: 1; margin: 0; text-align: left;">{{i[8]}} - On {{i[9]}} <span style="float:right">{{i[11]}}</span> </p>
             </table>
             <table style="width: 100%; border-top: 1px solid grey; border-bottom: 1px solid grey;">
                 <tr style="line-height: 1; margin: 0;">
@@ -48,7 +58,11 @@
                                 <td>{{i[0]}}</td>
                                 <td style="line-height: 1; margin: 0; font-size: 20px; text-align: center;">{{i[6]}}</td>
                                 <td>{{i[3]}}</td>
-                            </tr>                        
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td style="line-height: 1; margin: 0; font-size: 20px; text-align: center;">{{i[14]}}</td>
+                            </tr>                      
                     {%endif%}
                 </tr>
             {%endfor%}
